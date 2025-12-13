@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
+import SkeletonRow from "@/components/SkeletonRows";
 
 type Eser = {
   _id: string;
@@ -47,30 +49,20 @@ export default function AdminEserlerPage() {
     const token = localStorage.getItem("admin_token");
     if (!token) return;
 
+    const t = toast.loading("Siliniyor...");
     try {
       const res = await fetch(`/api/eserler/${id}`, {
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      if (!res.ok) {
-        throw new Error("Silme başarısız");
-      }
+      if (!res.ok) throw new Error();
 
       setEserler((prev) => prev.filter((e) => e._id !== id));
+      toast.success("Eser silindi", { id: t });
     } catch {
-      alert("Silme işlemi başarısız");
+      toast.error("Silme başarısız", { id: t });
     }
-  }
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-neutral-950 text-white flex items-center justify-center">
-        Yükleniyor...
-      </div>
-    );
   }
 
   return (
@@ -88,23 +80,36 @@ export default function AdminEserlerPage() {
 
       {hata && <p className="text-red-400">{hata}</p>}
 
-      {eserler.length === 0 ? (
-        <p className="text-neutral-400">Henüz eser eklenmemiş.</p>
-      ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full border border-neutral-800 text-sm">
-            <thead className="bg-neutral-900">
-              <tr>
-                <th className="p-3 text-left">Başlık</th>
-                <th className="p-3 text-left">Kategori</th>
-                <th className="p-3 text-left">Konum</th>
-                <th className="p-3 text-left">Yıl</th>
-                <th className="p-3 text-right">İşlemler</th>
-              </tr>
-            </thead>
+      <div className="overflow-x-auto">
+        <table className="w-full border border-neutral-800 text-sm">
+          <thead className="bg-neutral-900">
+            <tr>
+              <th className="p-3 text-left">Başlık</th>
+              <th className="p-3 text-left">Kategori</th>
+              <th className="p-3 text-left">Konum</th>
+              <th className="p-3 text-left">Yıl</th>
+              <th className="p-3 text-right">İşlemler</th>
+            </tr>
+          </thead>
 
-            <tbody>
-              {eserler.map((eser) => (
+          <tbody>
+            {loading ? (
+              <>
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <SkeletonRow key={i} />
+                ))}
+              </>
+            ) : eserler.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="p-6 text-center text-neutral-400"
+                >
+                  Henüz eser eklenmemiş.
+                </td>
+              </tr>
+            ) : (
+              eserler.map((eser) => (
                 <tr
                   key={eser._id}
                   className="border-t border-neutral-800 hover:bg-neutral-900 transition"
@@ -130,11 +135,11 @@ export default function AdminEserlerPage() {
                     </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
