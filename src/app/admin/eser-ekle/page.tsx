@@ -11,6 +11,8 @@ type FormState = {
   konum: string;
   yil: string; // input string
   kapakGorseliUrl: string;
+  kapakPosterUrl: string;
+  kapakBlurDataURL: string;
   galeri: string; // virgülle ayrılmış url string
   youtubeUrl: string;
 };
@@ -30,6 +32,8 @@ export default function EserEklePage() {
     konum: "",
     yil: "",
     kapakGorseliUrl: "",
+    kapakPosterUrl: "",
+    kapakBlurDataURL: "",
     galeri: "",
     youtubeUrl: "",
   });
@@ -76,15 +80,24 @@ export default function EserEklePage() {
     }
 
     const data = await res.json();
-    return data.url as string;
+    return data as {
+      url: string;
+      posterUrl?: string;
+      blurDataURL?: string;
+    };
   }
 
   async function kapakSecildi(file: File) {
     const t = toast.loading("Kapak yükleniyor...");
     setUploadingKapak(true);
     try {
-      const url = await uploadFile(file);
-      setForm((p) => ({ ...p, kapakGorseliUrl: url }));
+      const data = await uploadFile(file);
+      setForm((p) => ({
+        ...p,
+        kapakGorseliUrl: data.url,
+        kapakPosterUrl: data.posterUrl || "",
+        kapakBlurDataURL: data.blurDataURL || "",
+      }));
       toast.success("Kapak yüklendi", { id: t });
     } catch (e: any) {
       toast.error(e?.message || "Kapak yükleme başarısız", { id: t });
@@ -152,7 +165,10 @@ export default function EserEklePage() {
           ...form,
           yil: form.yil ? Number(form.yil) : undefined,
           galeri: form.galeri
-            ? form.galeri.split(",").map((x) => x.trim()).filter(Boolean)
+            ? form.galeri
+                .split(",")
+                .map((x) => x.trim())
+                .filter(Boolean)
             : [],
         }),
       });
@@ -200,7 +216,9 @@ export default function EserEklePage() {
         <Input
           label="Başlık *"
           value={form.baslik}
-          onChange={(e: any) => setForm((p) => ({ ...p, baslik: e.target.value }))}
+          onChange={(e: any) =>
+            setForm((p) => ({ ...p, baslik: e.target.value }))
+          }
           placeholder="Örn: Taş Cami Restorasyonu"
         />
 
@@ -208,7 +226,9 @@ export default function EserEklePage() {
         <Select
           label="Kategori"
           value={form.kategori}
-          onChange={(e: any) => setForm((p) => ({ ...p, kategori: e.target.value }))}
+          onChange={(e: any) =>
+            setForm((p) => ({ ...p, kategori: e.target.value }))
+          }
           options={[
             { value: "cami", label: "Cami" },
             { value: "villa", label: "Villa" },
@@ -231,13 +251,17 @@ export default function EserEklePage() {
           <Input
             label="Konum"
             value={form.konum}
-            onChange={(e: any) => setForm((p) => ({ ...p, konum: e.target.value }))}
+            onChange={(e: any) =>
+              setForm((p) => ({ ...p, konum: e.target.value }))
+            }
             placeholder="Örn: Erzurum"
           />
           <Input
             label="Yıl"
             value={form.yil}
-            onChange={(e: any) => setForm((p) => ({ ...p, yil: e.target.value }))}
+            onChange={(e: any) =>
+              setForm((p) => ({ ...p, yil: e.target.value }))
+            }
             placeholder="Örn: 2025"
             inputMode="numeric"
           />
@@ -253,7 +277,9 @@ export default function EserEklePage() {
 
         {/* Kapak Upload */}
         <div className="space-y-2">
-          <label className="block text-sm text-neutral-400">Kapak Görseli / Video *</label>
+          <label className="block text-sm text-neutral-400">
+            Kapak Görseli / Video *
+          </label>
           <input
             type="file"
             accept="image/*,video/*"
@@ -267,7 +293,9 @@ export default function EserEklePage() {
             className="w-full bg-neutral-900 border border-neutral-800 rounded-md px-4 py-2"
           />
           <div className="text-xs text-neutral-500">
-            {uploadingKapak ? "Kapak yükleniyor..." : "Kapak dosyası seçebilirsin (foto/video)."}
+            {uploadingKapak
+              ? "Kapak yükleniyor..."
+              : "Kapak dosyası seçebilirsin (foto/video)."}
           </div>
 
           {form.kapakGorseliUrl && (
@@ -296,7 +324,9 @@ export default function EserEklePage() {
 
         {/* Galeri Upload */}
         <div className="space-y-2">
-          <label className="block text-sm text-neutral-400">Galeri (çoklu foto – opsiyonel)</label>
+          <label className="block text-sm text-neutral-400">
+            Galeri (çoklu foto – opsiyonel)
+          </label>
           <input
             type="file"
             accept="image/*"
@@ -310,7 +340,9 @@ export default function EserEklePage() {
             className="w-full bg-neutral-900 border border-neutral-800 rounded-md px-4 py-2"
           />
           <div className="text-xs text-neutral-500">
-            {uploadingGaleri ? "Galeri yükleniyor..." : "Birden fazla foto seçebilirsin."}
+            {uploadingGaleri
+              ? "Galeri yükleniyor..."
+              : "Birden fazla foto seçebilirsin."}
           </div>
 
           {galeriUrlList.length > 0 && (
@@ -321,7 +353,11 @@ export default function EserEklePage() {
                   className="border border-neutral-800 rounded-lg overflow-hidden bg-neutral-900"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt={`Galeri ${i + 1}`} className="w-full h-28 object-cover" />
+                  <img
+                    src={url}
+                    alt={`Galeri ${i + 1}`}
+                    className="w-full h-28 object-cover"
+                  />
                 </div>
               ))}
             </div>
@@ -331,7 +367,9 @@ export default function EserEklePage() {
           <Textarea
             label="Galeri URL (virgülle ayır)"
             value={form.galeri}
-            onChange={(e: any) => setForm((p) => ({ ...p, galeri: e.target.value }))}
+            onChange={(e: any) =>
+              setForm((p) => ({ ...p, galeri: e.target.value }))
+            }
             placeholder="https://... , https://..."
           />
         </div>

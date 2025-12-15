@@ -1,28 +1,25 @@
-import mongoose, { Schema, models, model } from "mongoose";
+import mongoose from "mongoose";
 
-const EserSchema = new Schema(
+const EserSchema = new mongoose.Schema(
   {
-    baslik: { type: String, required: true },
-    slug: { type: String, unique: true },
-
-    kategori: {
-      type: String,
-      enum: ["cami", "villa", "tas-ev", "restorasyon"],
-      required: true
-    },
-
-    aciklama: { type: String, required: true },
-
+    baslik: String,
+    slug: String,
+    kategori: String,
+    aciklama: String,
     konum: String,
     yil: Number,
 
-    kapakGorseliUrl: { type: String, required: true },
-    galeri: [String],
+    kapakGorseliUrl: String,
 
-    youtubeUrl: String
+    // ADVANCED MEDIA
+    kapakPosterUrl: String,     // video için
+    kapakBlurDataURL: String,   // image için
+
+    galeri: [String],
+    youtubeUrl: String,
   },
   { timestamps: true }
 );
 
-const Eser = models.Eser || model("Eser", EserSchema);
-export default Eser;
+export default mongoose.models.Eser ||
+  mongoose.model("Eser", EserSchema);
