@@ -20,10 +20,7 @@ export async function POST(req: Request) {
   }
 
   if (!process.env.JWT_SECRET) {
-    return NextResponse.json(
-      { mesaj: "JWT_SECRET eksik" },
-      { status: 500 }
-    );
+    return NextResponse.json({ mesaj: "JWT_SECRET eksik" }, { status: 500 });
   }
 
   // 🔐 JWT'yi runtime'da import et
@@ -46,6 +43,7 @@ export async function POST(req: Request) {
     konum: body.konum,
     yil: body.yil,
     kapakGorseliUrl: body.kapakGorseliUrl,
+    detayVideoUrl: body.detayVideoUrl,
     galeri: body.galeri,
     youtubeUrl: body.youtubeUrl,
   });

@@ -17,9 +17,11 @@ export default function EserCard({
     <Link
       href={`/eserler/${slug}`}
       className="group bg-white border border-[#E5E3DF] rounded-xl overflow-hidden hover:border-[#C9A24D] transition"
+      
     >
       <div className="aspect-[4/3] overflow-hidden bg-neutral-100">
         {/* eslint-disable-next-line @next/next/no-img-element */}
+
         <img
           src={kapakGorseliUrl}
           alt={baslik}

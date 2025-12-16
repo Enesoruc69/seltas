@@ -8,12 +8,10 @@ const EserSchema = new mongoose.Schema(
     aciklama: String,
     konum: String,
     yil: Number,
-
     kapakGorseliUrl: String,
-
-    // ADVANCED MEDIA
-    kapakPosterUrl: String,     // video için
-    kapakBlurDataURL: String,   // image için
+    kapakPosterUrl: String, // video için
+    kapakBlurDataURL: String, // image için
+    detayVideoUrl: { type: String, default: "" },
 
     galeri: [String],
     youtubeUrl: String,
@@ -21,5 +19,4 @@ const EserSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.models.Eser ||
-  mongoose.model("Eser", EserSchema);
+export default mongoose.models.Eser || mongoose.model("Eser", EserSchema);

@@ -58,6 +58,7 @@ export async function PUT(
       baslik: body.baslik,
       kategori: body.kategori,
       aciklama: body.aciklama,
+      detayVideoUrl: body.detayVideoUrl,
       konum: body.konum,
       yil: body.yil,
       kapakGorseliUrl: body.kapakGorseliUrl,
@@ -92,7 +93,6 @@ export async function DELETE(
     );
   }
 
-  // 🔐 JWT'yi runtime'da import et (ÖNEMLİ)
   const { default: jwt } = await import("jsonwebtoken");
 
   try {
