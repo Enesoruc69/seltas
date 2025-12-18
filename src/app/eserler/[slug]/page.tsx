@@ -40,7 +40,9 @@ export default async function EserDetayPage({
   const eser = await getEser(slug);
   if (!eser) notFound();
 
-  const embedUrl = youtubeEmbedUrl(eser.youtubeUrl);
+const embedUrl = eser.youtubeUrl
+  ? youtubeEmbedUrl(eser.youtubeUrl)
+  : null;
 
   const temizGaleri =
     eser.galeri?.filter(
@@ -95,7 +97,6 @@ export default async function EserDetayPage({
               className="w-full max-h-[520px] object-cover bg-black"
             />
           ) : (
-            // Cloudinary / remote image için şimdilik <img> (next/image için next.config ayarı gerekir)
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={eser.kapakGorseliUrl}
@@ -135,7 +136,7 @@ export default async function EserDetayPage({
             {embedUrl && (
               <section>
                 <h2 className="text-lg font-light mb-4 text-[#1C1C1C]">
-                  Video
+                  Detaylı Video
                 </h2>
                 <div className="aspect-video w-full rounded-xl overflow-hidden border border-[#E5E3DF] bg-black">
                   <iframe

@@ -5,6 +5,7 @@ type Eser = {
   baslik: string;
   kategori: string;
   kapakGorseliUrl: string;
+  slug: string;
 };
 
 async function getEserler(): Promise<Eser[]> {
