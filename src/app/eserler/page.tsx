@@ -22,7 +22,7 @@ export default async function EserlerPage() {
   const eserler = await getEserler();
 
   return (
-    <main className="bg-[#F8F7F4] min-h-screen">
+    <main className="bg-[#F8F7F4] min-h-screen ">
       <div className="max-w-6xl mx-auto px-6 py-20">
         {/* Başlık */}
         <div className="text-center mb-14">

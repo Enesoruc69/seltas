@@ -66,7 +66,7 @@ export default function AdminEserlerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-neutral-950 text-white p-10">
+    <div className="min-h-screen bg-neutral-950 text-white p-10 mt-20">
       <div className="flex items-center justify-between mb-8">
         <h1 className="text-2xl font-light">Eserler</h1>
 

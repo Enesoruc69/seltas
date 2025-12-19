@@ -50,7 +50,7 @@ const embedUrl = eser.youtubeUrl
     ) || [];
 
   return (
-    <main className="bg-[#F8F7F4] min-h-screen">
+    <main className="bg-[#F8F7F4] min-h-screen  ">
       <div className="max-w-6xl mx-auto px-6 py-16">
         {/* Breadcrumb + Başlık */}
         <div className="mb-10">
