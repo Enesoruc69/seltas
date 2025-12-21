@@ -29,10 +29,8 @@ export default function AdminLoginPage() {
         throw new Error(data.mesaj || "Giriş başarısız");
       }
 
-      // 🔐 Token sakla
       localStorage.setItem("admin_token", data.token);
 
-      // 👉 Dashboard'a yönlendir
       router.push("/admin/dashboard");
     } catch (err: any) {
       setHata(err.message);

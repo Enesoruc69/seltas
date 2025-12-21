@@ -61,74 +61,78 @@ export default function EserEklePage() {
     return /\/video\/upload\//.test(url) || /\.(mp4|webm|mov)(\?|$)/i.test(url);
   }
 
-  async function uploadFile(file: File) {
-    const fd = new FormData();
-    fd.append("file", file);
+  async function uploadFile(file: File): Promise<{
+  url: string;
+  posterUrl?: string;
+  blurDataURL?: string;
+}> {
+  const fd = new FormData();
+  fd.append("file", file);
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: fd,
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    body: fd,
+  });
+
+  if (!res.ok) {
+    let msg = "Upload başarısız";
+    try {
+      const data = await res.json();
+      if (data?.error) msg = data.error;
+    } catch {}
+    throw new Error(msg);
+  }
+
+  return await res.json(); // ✅ OBJECT DÖNÜYOR
+}
+
+
+async function kapakSecildi(file: File) {
+  const t = toast.loading("Kapak yükleniyor...");
+  setUploadingKapak(true);
+  try {
+    const data = await uploadFile(file);
+
+    setForm((p) => ({
+      ...p,
+      kapakGorseliUrl: data.url,
+      kapakPosterUrl: data.posterUrl || "",
+      kapakBlurDataURL: data.blurDataURL || "",
+    }));
+
+    toast.success("Kapak yüklendi", { id: t });
+  } catch (e: any) {
+    toast.error(e?.message || "Kapak yükleme başarısız", { id: t });
+  } finally {
+    setUploadingKapak(false);
+  }
+}
+
+
+async function galeriSecildi(files: FileList) {
+  const t = toast.loading("Galeri yükleniyor...");
+  setUploadingGaleri(true);
+  try {
+    const arr = Array.from(files);
+    const sonuc = await Promise.all(arr.map(uploadFile)); // object[]
+    const urls = sonuc.map((x) => x.url);                 // string[]
+
+    setForm((p) => {
+      const mevcut = typeof p.galeri === "string" ? p.galeri.trim() : "";
+      const eklenecek = urls.join(", ");
+      return {
+        ...p,
+        galeri: mevcut ? `${mevcut}, ${eklenecek}` : eklenecek,
+      };
     });
 
-    if (!res.ok) {
-      let msg = "Upload başarısız";
-      try {
-        const data = await res.json();
-        if (data?.error) msg = data.error;
-      } catch {}
-      throw new Error(msg);
-    }
-
-    const data = await res.json();
-    return data as {
-      url: string;
-      posterUrl?: string;
-      blurDataURL?: string;
-    };
+    toast.success("Galeri yüklendi", { id: t });
+  } catch (e: any) {
+    toast.error(e?.message || "Galeri yükleme başarısız", { id: t });
+  } finally {
+    setUploadingGaleri(false);
   }
-
-  async function kapakSecildi(file: File) {
-    const t = toast.loading("Kapak yükleniyor...");
-    setUploadingKapak(true);
-    try {
-      const data = await uploadFile(file);
-      setForm((p) => ({
-        ...p,
-        kapakGorseliUrl: data.url,
-        kapakPosterUrl: data.posterUrl || "",
-        kapakBlurDataURL: data.blurDataURL || "",
-      }));
-      toast.success("Kapak yüklendi", { id: t });
-    } catch (e: any) {
-      toast.error(e?.message || "Kapak yükleme başarısız", { id: t });
-    } finally {
-      setUploadingKapak(false);
-    }
-  }
-
-  async function galeriSecildi(files: FileList) {
-    const t = toast.loading("Galeri yükleniyor...");
-    setUploadingGaleri(true);
-    try {
-      const arr = Array.from(files);
-      const urls = await Promise.all(arr.map(uploadFile));
-
-      setForm((p) => {
-        const mevcut = p.galeri ? p.galeri.trim() : "";
-        const eklenecek = urls.join(", ");
-        return {
-          ...p,
-          galeri: mevcut ? `${mevcut}, ${eklenecek}` : eklenecek,
-        };
-      });
-
-      toast.success("Galeri yüklendi", { id: t });
-    } catch (e: any) {
-      toast.error(e?.message || "Galeri yükleme başarısız", { id: t });
-    } finally {
-      setUploadingGaleri(false);
-    }
-  }
+}
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -142,11 +146,11 @@ export default function EserEklePage() {
     }
 
     // Basit validasyon
-    if (!form.baslik.trim()) {
+    if (!form.baslik?.trim()) {
       toast.error("Başlık zorunlu");
       return;
     }
-    if (!form.kapakGorseliUrl.trim()) {
+    if (!form.kapakGorseliUrl?.trim()) {
       toast.error("Kapak görseli zorunlu");
       return;
     }
@@ -164,12 +168,13 @@ export default function EserEklePage() {
         body: JSON.stringify({
           ...form,
           yil: form.yil ? Number(form.yil) : undefined,
-          galeri: form.galeri
-            ? form.galeri
-                .split(",")
-                .map((x) => x.trim())
-                .filter(Boolean)
-            : [],
+          galeri: typeof form.galeri === "string"
+  ? form.galeri
+      .split(",")
+      .map((x) => x?.trim())
+      .filter(Boolean)
+  : [],
+
         }),
       });
 
@@ -363,7 +368,6 @@ export default function EserEklePage() {
             </div>
           )}
 
-          {/* İstersen manuel düzenleme için textarea bırakıyorum */}
           <Textarea
             label="Galeri URL (virgülle ayır)"
             value={form.galeri}
